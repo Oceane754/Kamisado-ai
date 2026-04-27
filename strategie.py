@@ -19,15 +19,15 @@ def choose_move(state):
 
 
 # état fictif
-fake_state = {
-    "board": [[None for _ in range(8)] for _ in range(8)],
-    "pieces": {
-        "me": [[6, 0], [6, 1]],
-        "opponent": [[1, 0], [1, 1]]
-    }
-}
+#fake_state = {
+   # "board": [[None for _ in range(8)] for _ in range(8)],
+  #  "pieces": {
+    #    "me": [[6, 0], [6, 1]],
+   #     "opponent": [[1, 0], [1, 1]]
+  #  }
+#}
 
 # appel de la fonction
-choose_move(fake_state)
+#choose_move(fake_state)
 
-print("TEST FINI")
+print("TEST FINi")
