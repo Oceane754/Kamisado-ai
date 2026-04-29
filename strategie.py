@@ -70,6 +70,67 @@ def choose_move(state):
 #sécurité ; si ma toour est bloquée car pas de case libre devant ni en diagonale :
     if not moves:   
         return [[x, y], [x, y]]
+    
+ #filtrer les moves dangereux 
+    safe_moves = []
+
+    for move in moves:
+        nx, ny = move
+        #couleur  que je choisi pour l’adversaire
+        couleur_donnee = plateau[nx][ny][0]
+
+        #chercher la tour adverse de cette même couleur
+        tour_adverse = None
+
+        for i in range(8):
+            for j in range(8):
+                piece = plateau[i][j][1]
+                if piece is not None:
+                    color, kind = piece
+                    if kind != mon_joueur and color == couleur_donnee:
+                        tour_adverse = (i, j)
+
+        
+        danger = False # vérifie si l’adversaire peut gagner
+        
+        if tour_adverse:
+            ax, ay = tour_adverse
+
+            # direction de l’adversaire
+            if mon_joueur == "dark":
+                directions_adv = [(1, 0), (1, -1), (1, 1)]
+                objectif = 7
+            else:
+                directions_adv = [(-1, 0), (-1, -1), (-1, 1)]
+                objectif = 0
+
+            for dx, dy in directions_adv:
+                tx, ty = ax, ay
+
+                while True:
+                    tx += dx
+                    ty += dy
+
+                    if tx < 0 or tx > 7 or ty < 0 or ty > 7:    #si on sort du plateau ; on arrête d'explorer cette direction
+                        break  #break=sortir de la boucle immédiatement
+
+                    if plateau[tx][ty][1] is not None:     #un tour le bloque : break
+                        break
+
+                    #si l’adversaire peut atteindre la ligne finale : BIGG danger
+                    if tx == objectif:
+                        danger = True
+                        break
+
+                if danger:
+                    break
+
+        if not danger:
+            safe_moves.append(move)
+
+    if safe_moves:
+        moves = safe_moves
+
 
 #ici je crée la règle "if i can WIN so I win",
 # gagner si possible, pour ne jamais rater une victoire 
