@@ -70,6 +70,19 @@ def choose_move(state):
     if not moves:   
         return [[x, y], [x, y]]
     
+    #ici je crée la règle "if i can WIN so I win",
+# gagner si possible, pour ne jamais rater une victoire 
+    if mon_joueur == "dark":
+        objectif = 0
+    else:
+        objectif = 7
+        
+    for move in moves:
+        nx, ny = move
+        
+        if (mon_joueur == "dark" and nx == 0) or (mon_joueur == "light" and nx == 7):
+            return[[x, y], move]
+
  #filtrer les moves dangereux 
     safe_moves = []
 
@@ -129,15 +142,6 @@ def choose_move(state):
 
     if safe_moves:
         moves = safe_moves
-
-
-#ici je crée la règle "if i can WIN so I win",
-# gagner si possible, pour ne jamais rater une victoire 
-    for move in moves:
-        nx, ny = move
-
-        if (mon_joueur == "dark" and nx == 0) or (mon_joueur == "light" and nx == 7):
-            return[[x, y], move]
 
 #SI je ne peux pas gagner : je calcule un score et je prend le meilleur move
     best_move = None
