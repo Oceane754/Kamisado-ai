@@ -21,7 +21,27 @@ def choose_move(state):
     if not mes_tours: #sécurité ; pour pas que ça crash lorsqu'il n'y a aucune tour jouable( aucune qui ne respecte la couleur imposée)
             return [[0, 0], [0, 0]]
     
-    x, y = mes_tours[0] #on prend la premiere tour 
+    if state["color"] is None:           # bloc qui sert à prendre un coup intelligent,avantage au début de partie: choisir la meilleur tour
+        meilleure_tour = None
+        meilleur_progres = float('-inf')
+
+        for i, j in mes_tours:
+
+            if mon_joueur == "dark":
+                progres = 7 - i     # car joueur qui doit aller en haut
+            else:
+                progres = i         # car joueur light va vers le bas
+
+            if progres > meilleur_progres:
+                meilleur_progres = progres
+                meilleure_tour = [i, j]
+
+        x, y = meilleure_tour
+
+    else:
+        x, y = mes_tours[0]
+
+
 
     moves = []  # création d'une liste pour les mouvements possibles
 
