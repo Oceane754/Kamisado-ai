@@ -37,7 +37,6 @@ def choose_move(state):
                 meilleure_tour = [i, j]
 
         x, y = meilleure_tour
-
     else:
         x, y = mes_tours[0]
 
@@ -182,6 +181,45 @@ def choose_move(state):
 
         score += nb_options
 
+        # limiter les moves adverses
+        couleur_donnee = plateau[nx][ny][0]
+
+        tour_adverse = None
+        for i in range(8):
+            for j in range(8):
+                piece = plateau[i][j][1]
+                if piece is not None:
+                    color, kind = piece
+                    if kind != mon_joueur and color == couleur_donnee:
+                        tour_adverse = (i, j)
+
+        nb_moves_adv = 0
+
+        if tour_adverse:
+            ax, ay = tour_adverse
+
+            if mon_joueur == "dark":
+                directions_adv = [(1, 0), (1, -1), (1, 1)]
+            else:
+                directions_adv = [(-1, 0), (-1, -1), (-1, 1)]
+
+            for dx, dy in directions_adv:
+                step = 1
+                while True:
+                    tx = ax + dx * step
+                    ty = ay + dy * step
+
+                    if tx < 0 or tx > 7 or ty < 0 or ty > 7:
+                        break
+
+                    if plateau[tx][ty][1] is not None:
+                        break
+
+                    nb_moves_adv += 1
+                    step += 1
+
+        score -= nb_moves_adv
+
         if score > best_score:
                 best_score = score
                 best_move = move
@@ -193,3 +231,6 @@ def choose_move(state):
     # sinon on ne bouge pas (cas bloqué)
     return [[x, y], [x, y]]
 
+
+
+#la je vais ajouter : choisir un move qui donne une tour adverse bloquéé: pour bloquer l'adversaire sans qu'il y 'est une repercussion sur moi  
