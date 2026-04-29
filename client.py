@@ -1,17 +1,13 @@
 import socket
 import json
 import struct
-
-SERVER_IP = "127.0.0.1"  # L'adresse IP du serveur (localhost = mon propre ordinateur)
-SERVER_PORT = 3000 # Le port où le serveur écoute
-
-CLIENT_IP = "127.0.0.1" # L'adresse IP où l'IA écoute
-CLIENT_PORT = 8888 # Mon port
+import protocol
+import strategie
 
 def envoyer_message(sock, message_dict):
     message_bytes = json.dumps(message_dict).encode('utf-8')
     taille = len(message_bytes)
-    taille_bytes = struct.pack('<I', taille) # Transforme la taille du message en un entier binaire sur 4 octets
+    taille_bytes = struct.pack('<I', taille) # Encodage de la taille en 4 bytes
     sock.sendall(taille_bytes + message_bytes)
 
 def recevoir_message(sock):
@@ -23,58 +19,45 @@ def recevoir_message(sock):
     message_bytes = sock.recv(taille)
     return json.loads(message_bytes.decode('utf-8'))
 
-def inscription():
-    # Création du socket pour se connecter au serveur
+def inscription(server_ip, server_port, client_port, nom_ia, matricules):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
-        print(f"Tentative de connexion au serveur {SERVER_IP}:{SERVER_PORT}...")
-        client_socket.connect((SERVER_IP, SERVER_PORT))
+        print(f"Tentative de connexion au serveur {server_ip}:{server_port}...")
+        client_socket.connect((server_ip, server_port))
         print("Connectée ! Envoi de l'inscription...")
         
-        requete_inscription = {
-            "request": "subscribe",
-            "port": CLIENT_PORT,
-            "name": "TLC",
-            "matricules": ["23276", "23202"]
-        }
-        
-        # J'utilise ma fonction pour envoyer
+        # On utilise protocol.py pour fabriquer le formulaire d'inscription
+        requete_inscription = protocol.make_subscribe_message(client_port, nom_ia, matricules)
         envoyer_message(client_socket, requete_inscription)
         
-        # J'attends la réponse du serveur
         reponse = recevoir_message(client_socket)
         print(f"Réponse du serveur : {reponse}")
 
-def lancer_ecoute():
+def lancer_ecoute(client_ip, client_port):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as ecoute_socket:
-        # Permet de relancer le programme tout de suite
         ecoute_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        ecoute_socket.bind((CLIENT_IP, CLIENT_PORT))
+        ecoute_socket.bind((client_ip, client_port))
         ecoute_socket.listen()
-        print(f"Notre IA est sur écoute sur le port {CLIENT_PORT}...")
+        print(f"Notre IA est sur écoute sur le port {client_port}...")
         
-        # Boucle infinie pour écouter en permanence
         while True:
-            conn, adresse = ecoute_socket.accept()
-            
+            conn, adresse = ecoute_socket.accept() # Connection spécifique entre le serveur et notre IA
             with conn:
-                # Usage de la connexion spécifique entre le serveur et notre IA
                 requete = recevoir_message(conn)
                 
                 if requete:
-                    print(f"--> Message reçu du serveur : {requete}")
-                    
                     type_requete = requete.get("request")
                     
                     if type_requete == "ping":
-                        reponse = {"response": "pong"}
+                        reponse = protocol.make_pong_message()
                         envoyer_message(conn, reponse)
-                        print("<-- Réponse 'pong' envoyée !\n")
+                        print("<-- Réponse 'pong' envoyée !")
                         
                     elif type_requete == "play":
                         print("Le serveur me demande de jouer !")
+                        etat_du_jeu = requete.get("state")
+                        mon_coup = strategie.choose_move(etat_du_jeu)
                         pass
-
-# Lancement du code
-if __name__ == "__main__":
-    inscription()
-    lancer_ecoute()
+                        
+                        response = protocol.make_move_message(mon_coup)
+                        envoyer_message(conn, response) 
+                        print("<-- Coup envoyé !")
