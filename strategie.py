@@ -1,33 +1,114 @@
-#lire l'état du jeu au moment t
-# fonction principale
 def choose_move(state):
-    my_towers = state["pieces"]["me"]
+    plateau = state ["board"]   # ici ça récupere le tableau de jeu 
 
-    x, y = my_towers[0]
+    mon_joueur = "dark" if state["current"] == 0 else "light" #dis si je suis dark(joueur du bas) ou bien light(joueur du haut)
+    couleur_imposee = state ["color"]      
+    mes_tours = [  ]  #liste pour stocker mes tours
 
-    print("Tour choisie :", x, y)
+#analyser/parcourir tout le plateau pour trouver toute MES tours
+    for i in range(8):
+        for j in range(8):
+            une_tour = plateau [i][j][1] # récupère la piece sur la case (ou pas None). [couleur case], [couleur tour au dessus], [dark 1/light 0]
 
-    new_x = x - 1
-    new_y = y
+            if une_tour is not None:
+                color, kind = une_tour 
 
-    print("Elle va vers :", new_x, new_y)
+                if kind == mon_joueur:
 
-    return {
-        "from": [x, y],
-        "to": [new_x, new_y]
-    }
+                    if couleur_imposee is None or color == couleur_imposee:    #si pas de couleur imposé au premier tour ; je peux jouer n'importe quelle tour
+                        mes_tours.append([i,j]) #on stocke sa position
+    
+    if not mes_tours: #sécurité ; pour pas que ça crash lorsqu'il n'y a aucune tour jouable( aucune qui ne respecte la couleur imposée)
+            return [[0, 0], [0, 0]]
+    
+    x, y = mes_tours[0] #on prend la premiere tour 
+
+    moves = []  # création d'une liste pour les mouvements possibles
+
+# directions diagonale possibles 
+    if mon_joueur == "dark":
+        directions = [(-1, 0), (-1, -1), (-1, 1)] # avant, diagonale gauche, diagonale droite
+    else:
+        directions = [(1, 0), (1, -1), (1, 1)]
+
+    for dx, dy in directions:   # génerer des moves
+        step = 1
+
+        while True:
+            nx = x + dx * step
+            ny = y + dy * step
+
+            if nx < 0 or nx > 7 or ny < 0 or ny > 7:
+                break
+
+            if plateau[nx][ny][1] is not None:
+                break
+
+            moves.append([nx, ny])
+            step += 1
+
+#sécurité ; si ma toour est bloquée car pas de case libre devant ni en diagonale :
+    if not moves:   
+        return [[x, y], [x, y]]
+
+#ici je crée la règle "if i can WIN so I win",
+# gagner si possible, pour ne jamais rater une victoire 
+    for move in moves:
+        nx, ny = move
+
+        if (mon_joueur == "dark" and nx == 0) or (mon_joueur == "light" and nx == 7):
+            return[[x, y], move]
+
+#SI je ne peux pas gagner : je calcule un score et je prend le meilleur move
+    best_move = None
+    best_score = float('-inf') # plusieur move avec plusieurs scores différents:
+
+    for move in moves:
+        nx, ny = move
+        score = 0
+# un move = [x,y], un second move = [x1,y1], ... et l'ia selon l'ordre logique va choisir le best move
+#score= progression + bonus + mobilité 
+
+        # progression : avancer vers la victoire 
+        if mon_joueur == "dark":
+            score += (7 - nx)
+        else:
+            score += nx
+
+        # bonus proche de l’arrivée
+        if (mon_joueur == "dark" and nx <= 1) or (mon_joueur == "light" and nx >= 6):
+            score += 10
+
+        # mobilité : nbr de moves/options possibles depuis la position du point 2 et 1
+        
+        nb_options = 0 # on commence par compter le nombre de moves possibles
+
+        for dx, dy in directions:
+            step = 1
+            while True:
+                tx = nx + dx * step  #on part d'une position FUTURE ( le move que je teste) "si je vais là? qu'est ce que je peux faire ensuite"
+                ty = ny + dy * step
 
 
-# état fictif
-#fake_state = {
-   # "board": [[None for _ in range(8)] for _ in range(8)],
-  #  "pieces": {
-    #    "me": [[6, 0], [6, 1]],
-   #     "opponent": [[1, 0], [1, 1]]
-  #  }
-#}
+                if tx < 0 or tx > 7 or ty < 0 or ty > 7: #l'ia sort du plateau ; arrêt
+                    break
 
-# appel de la fonction
-#choose_move(fake_state)
+                if plateau[tx][ty][1] is not None:  #si y'a déjà une tour adverse présente sur la case future; arrêt
+                    break
 
-print("TEST FINi")
+                nb_options += 1  # compter les possibilités
+                step += 1  
+
+        score += nb_options
+
+        if score > best_score:
+                best_score = score
+                best_move = move
+
+
+    if best_move:
+        return [[x, y], best_move]
+
+    # sinon on ne bouge pas (cas bloqué)
+    return [[x, y], [x, y]]
+
