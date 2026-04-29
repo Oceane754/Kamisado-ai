@@ -76,7 +76,7 @@ def choose_move(state):
         objectif = 0
     else:
         objectif = 7
-        
+
     for move in moves:
         nx, ny = move
         
@@ -222,7 +222,7 @@ def choose_move(state):
                     nb_moves_adv += 1
                     step += 1
 
-        score -= nb_moves_adv
+        score -= 3*nb_moves_adv
 
         if score > best_score:
                 best_score = score
