@@ -151,13 +151,13 @@ def choose_move(state):
 
         # progression : avancer vers la victoire 
         if mon_joueur == "dark":
-            score += (7 - nx)
+            score += 2*(7 - nx)
         else:
-            score += nx
+            score += 2*nx
 
         # bonus proche de l’arrivée
         if (mon_joueur == "dark" and nx <= 1) or (mon_joueur == "light" and nx >= 6):
-            score += 10
+            score += 20
 
         # mobilité : nbr de moves/options possibles depuis la position du point 2 et 1
         
