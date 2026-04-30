@@ -23,25 +23,10 @@ def choose_move(state):
     if not mes_tours: #sécurité ; pour pas que ça crash lorsqu'il n'y a aucune tour jouable( aucune qui ne respecte la couleur imposée)
             return [[0, 0], [0, 0]]
     
-    if state["color"] is None:           # bloc qui sert à prendre un coup intelligent,avantage au début de partie: choisir la meilleure tour
-        x,y = mes_tours[0] # initialisation avec la première tour trouvée
-        meilleur_progres = float('-inf')
-
-        for i, j in mes_tours:
-
-            if mon_joueur == "dark":
-                progres = 7 - i     # car joueur qui doit aller en haut
-            else:
-                progres = i         # car joueur light va vers le bas
-
-            if progres > meilleur_progres:
-                meilleur_progres = progres
-                x,y = i,j # on garde la position de la tour qui a le meilleur progès vers la victoire
-
+    if state["color"] is None:
+        x, y = random.choice(mes_tours)   # premier coup; choix libre
     else:
-        x, y = mes_tours[0] # sinon on prend la première tour trouvée respectant la couleur imposée
-
-
+        x, y = mes_tours[0]              # ensuite; une seule tour imposée
 
     moves = []  # création d'une liste pour les mouvements possibles
 
@@ -115,11 +100,13 @@ def choose_move(state):
         if tour_trouvee:
 
             if mon_joueur == "dark":
-                directions_adv = [(1, 0), (1, -1), (1, 1)] # Il descend vers 7
-                objectif = 7
+                directions_adv = [(1, 0), (1, -1), (1, 1)]
+                objectif_adv = 7
             else:
-                directions_adv = [(-1, 0), (-1, -1), (-1, 1)] # Il monte vers 0
-                objectif = 0
+                directions_adv = [(-1, 0), (-1, -1), (-1, 1)]
+                objectif_adv = 0
+
+
 
             # On simule l'avancée de la tour adverse dans chaque direction
             for dx, dy in directions_adv:
@@ -139,14 +126,16 @@ def choose_move(state):
 
                     # Adversaire passe par notre ancienne position
                     if tx == x and ty == y:
-                        pass
+                        tx += dx
+                        ty += dy
+                        continue
                         
                     # Adversaire bloqué par une pièce
                     elif plateau[tx][ty][1] is not None:
                         break
 
                     # Adversaire atteint son objectif
-                    if tx == objectif:
+                    if tx == objectif_adv:
                         danger = True
                         break
                 
@@ -218,7 +207,9 @@ def choose_move(state):
                     color, kind = piece
                     if kind != mon_joueur and color == couleur_donnee:
                         tour_adverse = (i, j)
-
+                        break
+            if tour_adverse:
+                break 
         nb_moves_adv = 0
 
         if tour_adverse:
