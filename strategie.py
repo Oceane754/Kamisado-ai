@@ -1,3 +1,5 @@
+import random
+
 def choose_move(state):
     plateau = state ["board"]   # ici ça récupere le tableau de jeu 
 
@@ -21,8 +23,8 @@ def choose_move(state):
     if not mes_tours: #sécurité ; pour pas que ça crash lorsqu'il n'y a aucune tour jouable( aucune qui ne respecte la couleur imposée)
             return [[0, 0], [0, 0]]
     
-    if state["color"] is None:           # bloc qui sert à prendre un coup intelligent,avantage au début de partie: choisir la meilleur tour
-        meilleure_tour = None
+    if state["color"] is None:           # bloc qui sert à prendre un coup intelligent,avantage au début de partie: choisir la meilleure tour
+        x,y = mes_tours[0] # initialisation avec la première tour trouvée
         meilleur_progres = float('-inf')
 
         for i, j in mes_tours:
@@ -34,11 +36,10 @@ def choose_move(state):
 
             if progres > meilleur_progres:
                 meilleur_progres = progres
-                meilleure_tour = [i, j]
+                x,y = i,j # on garde la position de la tour qui a le meilleur progès vers la victoire
 
-        x, y = meilleure_tour
     else:
-        x, y = mes_tours[0]
+        x, y = mes_tours[0] # sinon on prend la première tour trouvée respectant la couleur imposée
 
 
 
@@ -66,7 +67,7 @@ def choose_move(state):
             moves.append([nx, ny])
             step += 1
 
-#sécurité ; si ma toour est bloquée car pas de case libre devant ni en diagonale :
+#sécurité ; si ma tour est bloquée car pas de case libre devant ni en diagonale :
     if not moves:   
         return [[x, y], [x, y]]
     
@@ -88,64 +89,85 @@ def choose_move(state):
 
     for move in moves:
         nx, ny = move
-        #couleur  que je choisi pour l’adversaire
+        # Couleur de la case où l'on atterrit = couleur imposée à l'adversaire
         couleur_donnee = plateau[nx][ny][0]
+        
+        
+        ax, ay = -1,1 # Valeurs par défaut pour éviter problème d'itérabilité
+        tour_trouvee = False
 
-        #chercher la tour adverse de cette même couleur
-        tour_adverse = None
 
+        # On cherche la tour adverse de la couleur imposée
         for i in range(8):
             for j in range(8):
                 piece = plateau[i][j][1]
                 if piece is not None:
                     color, kind = piece
                     if kind != mon_joueur and color == couleur_donnee:
-                        tour_adverse = (i, j)
-
+                        ax,ay = i,j
+                        tour_trouvee = True
+                        break
+            if tour_trouvee:
+                break
         
         danger = False # vérifie si l’adversaire peut gagner
         
-        if tour_adverse:
-            ax, ay = tour_adverse
+        if tour_trouvee:
 
-            # direction de l’adversaire
             if mon_joueur == "dark":
-                directions_adv = [(1, 0), (1, -1), (1, 1)]
+                directions_adv = [(1, 0), (1, -1), (1, 1)] # Il descend vers 7
                 objectif = 7
             else:
-                directions_adv = [(-1, 0), (-1, -1), (-1, 1)]
+                directions_adv = [(-1, 0), (-1, -1), (-1, 1)] # Il monte vers 0
                 objectif = 0
 
+            # On simule l'avancée de la tour adverse dans chaque direction
             for dx, dy in directions_adv:
-                tx, ty = ax, ay
+                tx, ty = ax, ay # la position test
 
                 while True:
                     tx += dx
                     ty += dy
 
-                    if tx < 0 or tx > 7 or ty < 0 or ty > 7:    #si on sort du plateau ; on arrête d'explorer cette direction
-                        break  #break=sortir de la boucle immédiatement
-
-                    if plateau[tx][ty][1] is not None:     #un tour le bloque : break
+                    # Sortie du plateau
+                    if tx < 0 or tx > 7 or ty < 0 or ty > 7:
                         break
 
-                    #si l’adversaire peut atteindre la ligne finale : BIGG danger
+                    # Collision à notre nouvelle position
+                    if tx == nx and ty == ny:
+                        break
+
+                    # Adversaire passe par notre ancienne position
+                    if tx == x and ty == y:
+                        pass
+                        
+                    # Adversaire bloqué par une pièce
+                    elif plateau[tx][ty][1] is not None:
+                        break
+
+                    # Adversaire atteint son objectif
                     if tx == objectif:
                         danger = True
                         break
-
+                
                 if danger:
                     break
 
+        # On ajoute les safe moves à notre liste
         if not danger:
             safe_moves.append(move)
 
+    # On s'assure de ne faire que des safe moves
     if safe_moves:
         moves = safe_moves
+    else:
+        pass
+
+
 
 #SI je ne peux pas gagner : je calcule un score et je prend le meilleur move
     best_move = None
-    best_score = float('-inf') # plusieur move avec plusieurs scores différents:
+    best_score = float('-inf') # plusieurs move avec plusieurs scores différents:
 
     for move in moves:
         nx, ny = move
