@@ -36,3 +36,43 @@ def test_couleur_imposee():
     move = choose_move(state)
 
     assert move[0] == [6, 4]
+
+
+
+#test 3 ; active la partie danger 
+def test_evite_danger():
+    board = [[("white", None) for _ in range(8)] for _ in range(8)]
+
+    # rend la colonne dangereuse (bleue)
+    for i in range(8):
+        board[i][3] = ("blue", None)
+
+    # ma tour
+    board[6][3] = ("blue", ("blue", "dark"))
+
+    # adversaire prêt à gagner
+    board[1][3] = ("blue", ("blue", "light"))
+
+    state = {
+        "board": board,
+        "current": 0,
+        "color": None
+    }
+
+    move = choose_move(state)
+
+    # l'IA NE DOIT PAS avancer tout droit
+    assert move[1][1] != 3
+
+
+
+    # test 1: Si blocage ; l'ia ne bouge pas
+    # test 2:couleur imposée; l'ia doit jouer la tour correspondante 
+
+        # environ 31% de coverage = peu de ligne de code tester 
+    
+    #test 3: evitement du danger; évite de joeur un coup qui permet au rival de gagner
+
+        # environ 92% de coverage
+
+    
