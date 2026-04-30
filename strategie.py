@@ -259,4 +259,3 @@ def choose_move(state):
 
 
 
-#la je vais ajouter : choisir un move qui donne une tour adverse bloquéé: pour bloquer l'adversaire sans qu'il y 'est une repercussion sur moi  
