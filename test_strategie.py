@@ -75,4 +75,8 @@ def test_evite_danger():
 
         # environ 92% de coverage
 
+
+# Analyse
+# l'ia est efficace dans les situations testées, mais pourrait être améliorée pour battre les ia randoms
+
     
