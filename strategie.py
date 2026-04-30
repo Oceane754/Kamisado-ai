@@ -246,6 +246,29 @@ def choose_move(state):
 
         score -= 3*nb_moves_adv
 
+# piege ; creer des mauvais coups pour le rival
+
+        if tour_adverse:
+            ax, ay = tour_adverse
+
+    #recalcul des moves adverses
+
+            if nb_moves_adv == 0:
+                score += 100   #tour complètement bloquée pour le rival 
+
+            elif nb_moves_adv <= 2:
+                score += 30    #presque bloquée
+
+            else:
+                score -= nb_moves_adv   #sinon si trop libre: à éviter 
+   
+        #bloc pour forcer une tour loin de son objectif
+            if mon_joueur == "dark":
+                score += (7 - ax)
+            else:
+                score += ax
+
+
         if score > best_score:
                 best_score = score
                 best_move = move
