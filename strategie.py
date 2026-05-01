@@ -54,7 +54,7 @@ def choose_move(state):
 
 #sécurité ; si ma tour est bloquée car pas de case libre devant ni en diagonale :
     if not moves:   
-        return [[x, y], [x, y]]
+        return None #correction du bug qui terminait la partie dès que j'étais bloqué !!!
     
     #ici je crée la règle "if i can WIN so I win",
 # gagner si possible, pour ne jamais rater une victoire 
@@ -161,18 +161,23 @@ def choose_move(state):
     for move in moves:
         nx, ny = move
         score = 0
+
+        # éviter d'aller trop près de la fin trop tôt
+        if mon_joueur == "dark" and nx <= 1:
+            score -= 250
+        elif mon_joueur == "light" and nx >= 6:
+            score -= 250
+
+
 # un move = [x,y], un second move = [x1,y1], ... et l'ia selon l'ordre logique va choisir le best move
 #score= progression + bonus + mobilité 
 
         # progression : avancer vers la victoire 
         if mon_joueur == "dark":
-            score += 2*(7 - nx)
+            score += 1*(7 - nx)
         else:
-            score += 2*nx
+            score += 1*nx
 
-        # bonus proche de l’arrivée
-        if (mon_joueur == "dark" and nx <= 1) or (mon_joueur == "light" and nx >= 6):
-            score += 20
 
         # mobilité : nbr de moves/options possibles depuis la position du point 2 et 1
         
@@ -195,6 +200,10 @@ def choose_move(state):
                 step += 1  
 
         score += nb_options
+        if nb_options == 0:
+            score -= 1000   # interdit
+        elif nb_options <= 2:
+            score -= 120
 
         # limiter les moves adverses
         couleur_donnee = plateau[nx][ny][0]
@@ -240,16 +249,10 @@ def choose_move(state):
 # piege ; creer des mauvais coups pour le rival
 
         if tour_adverse:
-            ax, ay = tour_adverse
-
-    #recalcul des moves adverses
-
             if nb_moves_adv == 0:
-                score += 100   #tour complètement bloquée pour le rival 
-
+                score += 180   # fort bonus
             elif nb_moves_adv <= 2:
-                score += 30    #presque bloquée
-
+                score += 60
             else:
                 score -= nb_moves_adv   #sinon si trop libre: à éviter 
    
