@@ -52,6 +52,27 @@ def choose_move(state):
             moves.append([nx, ny])
             step += 1
 
+#ANTI-RUSH
+    filtered_moves = []
+
+    for move in moves:
+        nx, ny = move
+        distance = abs(nx - x) + abs(ny - y)
+
+        if (mon_joueur == "dark" and nx == 0) or (mon_joueur == "light" and nx == 7):
+            filtered_moves.append(move)
+    #limite les déplacements trop longs
+        elif distance <= 2:
+            filtered_moves.append(move)
+
+        elif distance == 3:
+            filtered_moves.append(move)  # optionnel
+
+# fallback si jamais tout est supprimé
+    if filtered_moves:
+        moves = filtered_moves
+
+
 #sécurité ; si ma tour est bloquée car pas de case libre devant ni en diagonale :
     if not moves:   
         return None #correction du bug qui terminait la partie dès que j'étais bloqué !!!
@@ -162,11 +183,49 @@ def choose_move(state):
         nx, ny = move
         score = 0
 
+
+        # éviter ligne dangereuse
+        if mon_joueur == "dark" and nx == 1:
+            score -= 400
+        elif mon_joueur == "light" and nx == 6:
+            score -= 400
+
+        distance = abs(nx - x)
+        #empêcher les gros rushs
+        if distance >= 3:
+            score -= 200
+        elif distance == 2:
+            score -= 40
+
+        distance = abs(nx - x) + abs(ny - y)       
+        score -= distance * 15
+
         # éviter d'aller trop près de la fin trop tôt
         if mon_joueur == "dark" and nx <= 1:
             score -= 250
         elif mon_joueur == "light" and nx >= 6:
             score -= 250
+
+        #contrôle de colonne (pour bloquer le rival )
+
+        colonne = ny
+        pieces_dans_colonne = 0
+
+        for i in range(8):
+            if plateau[i][colonne][1] is not None:
+                pieces_dans_colonne += 1
+
+        # bonus si colonne "bloquée"
+        score += pieces_dans_colonne * 10
+
+        #bonus centre (contrôle stratégique)
+        if 2 <= ny <= 5:
+            score += 20
+        else:
+             score -= 10
+
+        if pieces_dans_colonne <= 1:
+            score -= 80   # colonne trop ouverte = danger
 
 
 # un move = [x,y], un second move = [x1,y1], ... et l'ia selon l'ordre logique va choisir le best move
@@ -199,11 +258,34 @@ def choose_move(state):
                 nb_options += 1  # compter les possibilités
                 step += 1  
 
-        score += nb_options
+        score += nb_options*3
+
         if nb_options == 0:
             score -= 1000   # interdit
         elif nb_options <= 2:
             score -= 120
+
+        free_forward = 0
+
+        for dx, dy in directions:
+            step = 1
+            while True:
+                tx = nx + dx * step
+                ty = ny + dy * step
+
+                if tx < 0 or tx > 7 or ty < 0 or ty > 7:
+                 break
+
+                if plateau[tx][ty][1] is not None:
+                    break
+
+                free_forward += 1
+                step += 1
+
+        score += free_forward * 5
+
+        if free_forward <= 2:
+            score -= 150
 
         # limiter les moves adverses
         couleur_donnee = plateau[nx][ny][0]
@@ -223,6 +305,41 @@ def choose_move(state):
 
         if tour_adverse:
             ax, ay = tour_adverse
+
+
+            # 🧠 anticipation simple : est-ce que je serai bien après ?
+
+            mon_futur = 0
+
+            for dx, dy in directions:
+                step = 1
+                while True:
+                    tx = nx + dx * step
+                    ty = ny + dy * step
+
+                    if tx < 0 or tx > 7 or ty < 0 or ty > 7:
+                        break
+
+                    if plateau[tx][ty][1] is not None:
+                        break
+
+                    mon_futur += 1
+                    step += 1
+
+        # bonus si j’ai encore des options après
+            score += mon_futur * 4
+
+
+            if mon_futur == 0:
+                score -= 500   # mort directe
+            elif mon_futur <= 2:
+                score -= 100
+
+            #éviter de donner une tour trop avancée
+            if mon_joueur == "dark" and ax >= 5:
+                score -= 150
+            elif mon_joueur == "light" and ax <= 2:
+                score -= 150
 
             if mon_joueur == "dark":
                 directions_adv = [(1, 0), (1, -1), (1, 1)]
@@ -244,7 +361,10 @@ def choose_move(state):
                     nb_moves_adv += 1
                     step += 1
 
-        score -= 3*nb_moves_adv
+            score -= 6 * nb_moves_adv
+
+            if nb_moves_adv >= 6:
+                score -= 100   #DANGER: adversaire trop libre
 
 # piege ; creer des mauvais coups pour le rival
 
