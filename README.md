@@ -1,22 +1,34 @@
 # Kamisado-ai
 
 
-l'objectif de ce projet consiste à développer une intelligence artificielle capable de jouer au jeu kamisado via un système client-serveur.
+L'objectif de ce projet consiste à développer une intelligence artificielle capable de jouer au jeu kamisado àb travers un système client-serveur.
 
-Pour cela notre IA doit être capable de choisir des coups valides et efficaces sans générer de bad moves tout cela en fonction de l'état du jeu.
+L'IA doit pouvoir sélectionner des coups valides et efficaces sans générer de bad moves tout cela en fonction de l'état du jeu.
 
 
-#Structure du projet
-.
-├── main.py
-├── client.py
-├── protocol.py
-├── strategie.py
-├── requirements.txt
-└── README.md
+# Structure du projet
+
+─ main.py
+- main.rival.py
+─ client.py
+─ protocol.py
+─ strategie.py
+─ requirements.txt
+- test_move.py
+- test_strategie.py
+─ README.md
 
 
 # Fonctionnement 
+
+Le système repose sur une communication client - serveur:
+
+1) Le client se connecte au serveur via des sockets.
+2) Les messages sont échangés au format JSON.
+3) À chaque tour, l'état du jeu (state) est recu.
+4) La fonction choose_move(state) analyse le plateau.
+3) L'ia renvoie le meilleur coup possible sous forme de coordonnées.
+
 
 
 # Bibliothèque utilisé
@@ -27,40 +39,82 @@ JSON : pour envoyer et recevoir les données
 
 struct : gérer les données binaires (protocole)
 
+random : sélection aléatoire (première tour)
+
+
 # Modules du projet :
 
 vous verrez 3 modules 
 1) client.py   : responsable de la logique côté client et de la communication avec le serveur 
-2) protocol.py  : ce module est respinsable de la création et la gestion des messages (gestion des messages) :
-3) strategie.py  (logique de l'ia)
+2) protocol.py  : ce module est respinsable de la création et la gestion des messages (gestion des messages) 
+3) strategie.py : (logique de l'ia)
 
-## 🧠 Stratégie de l’IA
+# Stratégie de l’IA
 
-L’IA fonctionne en plusieurs étapes :
+L’IA repose sur une approche heuristique enrichie par des simulations locales avancée en plusieurs étapes: 
 
-1. Sélection des tours jouables selon la couleur imposée  
-2. Génération des déplacements possibles  
-3. Filtrage des coups dangereux (évite de donner une victoire directe)  
-4. Priorité aux coups gagnants  
-5. Sinon, choix du meilleur coup selon :
-   - la progression
+1) Analyse du plateau complet (8x8)
+ - identification des tours du joueur courant (dark/light)
+ - sélection des tours selon la couleur imposée
+
+2) Production des mouvements réalisables
+
+À chaque tour jouable, l’IA crée tous les mouvements possibles :
+- en avant,
+- en diagonale à gauche,
+- en diagonale à droite.
+
+  La génération s'interrompt dès qu'une limite est   franchie :
+
+- sortie de la plateforme,
+- choc avec un autre élément.
+
+3) Simulation et filtrage de risque de l'ia :
+ 
+ Avant chaque choix, l’IA évalue les résultats de chaque mouvement pour prévenir les erreurs majeures;
+
+ - anti-blunders (évite les pertes directes)
+ - anti-rush (prévient les avancées excessives qui pourraient se retourner contre elle).
+ - anticipation simple (évalue la capacité de réaction de l'adversaire au prochain tour)
+
+4) Priorité aux coups gagnants  
+
+Si un coup mène directement à la ligne de victoire, alors il est choisi immédiatement.
+
+
+5) Sinon, évaluation heuristique des mouvements :
+Si aucun coup gagnant n'est accessible, l'IA évalue chaque option en fonction de divers critères 
+   - la progression vers l'objectif
    - la proximité de la victoire
-   - la mobilité
+   - la mobilité (nombre de coups futures possibles)
+   - contrôle stratégique ( centre, colonne)
+   - réduction des options adverses
+
+6) Choix final basé sur l’heuristique.
+
+L’IA sélectionne le mouvement avec le meilleur score global, assurant :
+- sûreté (évite de perdre instantanées),
+- stabilité (maintient des options ouvertes) 
+
+
+
 
 # Installation 
 
 Pour installer le projet, veuillez suivre ces étapes :
- 1) dupliquer le repo en utilisant la commande git clone
- 2) installer les dépendances requises avec  pip install -r requirements.txt
- 3) configurer les paramètres du client et du serveur 
+ 1) Récuperer le repo en utilisant la commande git clone
+ 2) installer les dépendances requises avec  <pip install -r requirements.tx> 
+ 3) Dans un premier terminal, lancer le serveur <python3 serveur.py kamisado>
 
-# Exécution du projet 
-
-Pour exécuter le projet, suivez ces étapes :
-    1.  Exécuter le fichier main.py avec python main.py.
-    2.  Le client s’enregistrera auprès du serveur et établira une connexion.
-    3.  Le client enverra et recevra des messages avec le serveur, en utilisant une logique basée sur l’IA pour déterminer la meilleure action à entreprendre.
+ 4) Dans deux autres terminaux distincts, lancez les joueurs <python3 main.py > et <python3 main_rival.py >
 
 
 
-Pour toute questions, remarque ou retour, veuillez nous contacter à l'adresse suivant : 23276@ecam.be
+
+# Exécution et déroulement du projet 
+
+    •  Le serveur initialise la partie de Kamisado
+    •    Les deux clients se connectent automatiquement
+    •    Chaque IA reçoit l’état du jeu en temps réel
+    •    Les coups sont calculés et envoyés au serveur jusqu’à la fin de la partie
+
