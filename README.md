@@ -8,15 +8,15 @@ L'IA doit pouvoir sélectionner des coups valides et efficaces sans générer de
 
 # Structure du projet
 
-─ main.py
+- main.py
 - main.rival.py
-─ client.py
-─ protocol.py
-─ strategie.py
-─ requirements.txt
+- client.py
+- protocol.py
+- strategie.py
+- requirements.txt
 - test_move.py
 - test_strategie.py
-─ README.md
+- README.md
 
 
 # Fonctionnement 
@@ -103,7 +103,9 @@ L’IA sélectionne le mouvement avec le meilleur score global, assurant :
 
 Pour installer le projet, veuillez suivre ces étapes :
  1) Récuperer le repo en utilisant la commande git clone
+
  2) installer les dépendances requises avec  <pip install -r requirements.tx> 
+ 
  3) Dans un premier terminal, lancer le serveur <python3 serveur.py kamisado>
 
  4) Dans deux autres terminaux distincts, lancez les joueurs <python3 main.py > et <python3 main_rival.py >
