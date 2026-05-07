@@ -79,10 +79,7 @@ def test_evite_danger():
 # Analyse
 # l'ia est efficace dans les situations testées, mais pourrait être améliorée pour battre les ia randoms
 
-
-
-
-# TEST : IA bloquée
+#test4
 
 
 def test_bloque():
@@ -101,5 +98,28 @@ def test_bloque():
 
     # plus aucun move possible
     assert move is None
+
+
+#TEST 5: victoire immédiate
+
+
+def test_win_immediate():
+    board = [[("white", None) for _ in range(8)] for _ in range(8)]
+
+    # tour presque gagnante
+    board[1][4] = ("blue", ("blue", "dark"))
+
+    state = {
+        "board": board,
+        "current": 0,
+        "color": None
+    }
+
+    move = choose_move(state)
+
+    # doit atteindre la ligne finale
+    assert move[1][0] == 0
+
+ #89% de coverage 
 
 
