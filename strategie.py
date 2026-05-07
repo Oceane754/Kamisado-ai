@@ -75,7 +75,7 @@ def choose_move(state):
 
 #sécurité ; si ma tour est bloquée car pas de case libre devant ni en diagonale :
     if not moves:   
-        return None #correction du bug qui terminait la partie dès que j'étais bloqué !!!
+        return [[x, y], [x, y]]#correction du bug qui terminait la partie dès que j'étais bloqué !!!
     
     #ici je crée la règle "if i can WIN so I win",
 # gagner si possible, pour ne jamais rater une victoire 
