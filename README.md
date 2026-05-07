@@ -38,8 +38,10 @@ socket : pour établir la communication avec le serveur (gérer les connexions r
 JSON : pour envoyer et recevoir les données 
 
 struct : gérer les données binaires (protocole)
+Le module struct est utilisé dans la partie réseau du projet pour gérer le protocole de communication et manipuler les données binaires échangées avec le serveur.
 
-random : sélection aléatoire (première tour)
+Dans notre ia, seul le module random est utilisé
+random : sélection aléatoire de la tour au première tour, lorsqu'aucune couleur n'est imposée, une tour est choisie aléatoirement
 
 
 # Modules du projet :
