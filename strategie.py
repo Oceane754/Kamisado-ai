@@ -307,7 +307,7 @@ def choose_move(state):
             ax, ay = tour_adverse
 
 
-            # 🧠 anticipation simple : est-ce que je serai bien après ?
+            #anticipation simple :est-ce que je serai bien après?
 
             mon_futur = 0
 
