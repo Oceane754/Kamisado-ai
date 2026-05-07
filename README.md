@@ -1,7 +1,7 @@
 # Kamisado-ai
 
 
-L'objectif de ce projet consiste à développer une intelligence artificielle capable de jouer au jeu kamisado àb travers un système client-serveur.
+L'objectif de ce projet consiste à développer une intelligence artificielle capable de jouer au jeu kamisado à travers un système client-serveur.
 
 L'IA doit pouvoir sélectionner des coups valides et efficaces sans générer de bad moves tout cela en fonction de l'état du jeu.
 
@@ -9,7 +9,7 @@ L'IA doit pouvoir sélectionner des coups valides et efficaces sans générer de
 # Structure du projet
 
 - main.py
-- main.rival.py
+- main_rival.py
 - client.py
 - protocol.py
 - strategie.py
@@ -25,13 +25,13 @@ Le système repose sur une communication client - serveur:
 
 1) Le client se connecte au serveur via des sockets.
 2) Les messages sont échangés au format JSON.
-3) À chaque tour, l'état du jeu (state) est recu.
+3) À chaque tour, l'état du jeu (state) est reçu.
 4) La fonction choose_move(state) analyse le plateau.
 3) L'ia renvoie le meilleur coup possible sous forme de coordonnées.
 
 
 
-# Bibliothèque utilisé
+# Bibliothèques utilisées
 
 socket : pour établir la communication avec le serveur (gérer les connexions réseau)
 
@@ -43,13 +43,16 @@ Le module struct est utilisé dans la partie réseau du projet pour gérer le pr
 Dans notre ia, seul le module random est utilisé
 random : sélection aléatoire de la tour au première tour, lorsqu'aucune couleur n'est imposée, une tour est choisie aléatoirement
 
+Pytest : utilsé pour les coverages des tests 
+- 2 fichiers tests pour une couvrance finale de 87% contenant 7 tests internes. 
+
 
 # Modules du projet :
 
 vous verrez 3 modules 
 1) client.py   : responsable de la logique côté client et de la communication avec le serveur 
 2) protocol.py  : ce module est respinsable de la création et la gestion des messages (gestion des messages) 
-3) strategie.py : (logique de l'ia)
+3) strategie.py : logique de l'ia
 
 # Stratégie de l’IA
 
@@ -66,12 +69,12 @@ L’IA repose sur une approche heuristique enrichie par des simulations locales 
 - en diagonale à gauche,
 - en diagonale à droite.
 
-  La génération s'interrompt dès qu'une limite est   franchie :
+  La génération s'interrompt dès qu'une limite est franchie :
 
 - sortie de la plateforme,
 - choc avec un autre élément.
 
-3) Simulation et filtrage de risque de l'ia :
+3) Simulation et filtrage de risque de l'IA :
  
  Avant chaque choix, l’IA évalue les résultats de chaque mouvement pour prévenir les erreurs majeures;
 
@@ -108,7 +111,7 @@ Pour installer le projet, veuillez suivre ces étapes :
 
  2) installer les dépendances requises avec  <pip install -r requirements.tx> 
  
- 3) Dans un premier terminal, lancer le serveur <python3 serveur.py kamisado>
+ 3) Dans un premier terminal, lancer le serveur <python3 server.py kamisado>
 
  4) Dans deux autres terminaux distincts, lancez les joueurs <python3 main.py > et <python3 main_rival.py >
 
@@ -122,3 +125,7 @@ Pour installer le projet, veuillez suivre ces étapes :
     •    Chaque IA reçoit l’état du jeu en temps réel
     •    Les coups sont calculés et envoyés au serveur jusqu’à la fin de la partie
 
+# Groupe ayant réalisé l'ia
+
+Océane Lumpungu 23202
+Nouhayla Belkassmi 23276
