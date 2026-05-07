@@ -123,3 +123,23 @@ def test_win_immediate():
  #89% de coverage 
 
 
+ #test6 : joueur light
+
+
+def test_light_player():
+    board = [[("white", None) for _ in range(8)] for _ in range(8)]
+
+    board[1][3] = ("blue", ("blue", "light"))
+
+    state = {
+        "board": board,
+        "current": 1,
+        "color": None
+    }
+
+    move = choose_move(state)
+
+    # light avance vers le bas
+    assert move[1][0] > 1
+
+#result = 87% ; 5 passed  
